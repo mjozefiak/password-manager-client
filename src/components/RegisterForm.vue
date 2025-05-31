@@ -1,5 +1,5 @@
 <template>
-    <form @submit.prevent="auth({email: email, password: password})" class="form">
+    <form @submit.prevent="register({email: email, password: password})" class="form">
       <h2 class="title">{{ title }}</h2>
   
       <input v-model="email" type="email" placeholder="Email" required />
@@ -13,7 +13,7 @@
   
   <script setup>
   import { ref } from 'vue'
-  import { auth } from '@/api'
+  import { register } from '@/api'
   
   const props = defineProps({
     title: String,
