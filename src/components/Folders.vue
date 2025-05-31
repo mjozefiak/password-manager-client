@@ -1,131 +1,62 @@
 <template>
-  <div class="folders">
-    <h2>Foldery</h2>
-
-    <!-- Formularz dodawania folderu -->
-    <div class="add-folder">
-      <input v-model="newFolderName" placeholder="Nowy folder" />
-      <button @click="addFolder">Dodaj</button>
-    </div>
-
-    <ul>
-      <li
-        v-for="folder in folders"
-        :key="folder.id"
-        :class="{ selected: folder.id === selectedFolderId }"
-        @click="selectFolder(folder)"
+   <div class="w-64 border-r border-gray-200 p-6 flex flex-col h-full">
+      <h2
+         class="text-2xl font-bold mb-6 font-sans tracking-tight text-gray-800"
       >
-        {{ folder.name }}
-        <button @click.stop="deleteFolder(folder.id)">🗑️</button>
-      </li>
-    </ul>
-  </div>
+         Foldery
+      </h2>
+      <Button
+         icon="pi pi-plus"
+         label="Add Folder"
+         class="mb-4 w-full p-button-success"
+         @click="showAddFolder = true"
+      />
+      <PanelMenu :model="panelMenuModel" class="w-full" />
+      <AddFolderDialog
+         v-model:visible="showAddFolder"
+         :folders="props.folders"
+         @add="addFolder"
+      />
+   </div>
 </template>
 
-<script>
-import { ref, watch } from 'vue';
-import { createFolder, deleteFolder as apiDeleteFolder } from '@/api';
+<script setup>
+import { ref, computed } from 'vue';
+import PanelMenu from 'primevue/panelmenu';
+import Button from 'primevue/button';
+import AddFolderDialog from './AddFolderDialog.vue';
 
-export default {
-  props: {
-    folders: Array,
-    selectedFolderId: [String, Number, null], // dodaj ten props
-  },
-  emits: ['folder-selected', 'folder-changed'],
-  setup(props, { emit }) {
-    const newFolderName = ref('');
+const props = defineProps({
+   folders: {
+      type: Array,
+      required: true,
+   },
+});
 
-    watch(
-      () => props.folders,
-      (folders) => {
-        if (folders.length > 0 && !props.selectedFolderId) {
-          emit('folder-selected', folders[0]);
-        }
-      },
-      { immediate: true }
-    );
+const emit = defineEmits(['folder-selected', 'folder-added']);
 
-    function selectFolder(folder) {
-      emit('folder-selected', folder);
-    }
+const showAddFolder = ref(false);
 
-    async function addFolder() {
-      if (!newFolderName.value.trim()) return;
-      await createFolder({
-        name: newFolderName.value,
-        parent: null,
-        children: [],
-        valuts: [],
-        owner: null,
+function buildTree(folders, parentId = null) {
+   if (!Array.isArray(folders)) return [];
+   return folders
+      .filter((folder) => folder && folder.parentId === parentId)
+      .map((folder) => {
+         const children = buildTree(folders, folder.id);
+         return {
+            key: folder.id,
+            label: folder.name,
+            icon: 'pi pi-folder',
+            items: children.length > 0 ? children : undefined,
+            folderRef: folder,
+            command: (event) => emit('folder-selected', event.item.folderRef),
+         };
       });
-      newFolderName.value = '';
-      emit('folder-changed');
-    }
+}
 
-    async function deleteFolder(id) {
-      if (!confirm('Na pewno usunąć folder?')) return;
-      await apiDeleteFolder(id);
-      if (props.selectedFolderId === id) {
-        emit('folder-selected', null);
-      }
-      emit('folder-changed');
-    }
+const panelMenuModel = computed(() => buildTree(props.folders ?? []));
 
-    return {
-      selectFolder,
-      newFolderName,
-      addFolder,
-      deleteFolder,
-    };
-  },
-};
+function addFolder(newFolder) {
+   emit('folder-added', newFolder);
+}
 </script>
-
-<style scoped>
-.folders {
-  width: 250px;
-  border-right: 1px solid #ddd;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-}
-
-ul {
-  list-style: none;
-  padding-left: 0;
-  margin-bottom: 1rem;
-  flex-grow: 1;
-  overflow-y: auto;
-}
-
-li {
-  cursor: pointer;
-  padding: 0.3rem 0.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-li.selected {
-  background-color: #d0ebff;
-}
-
-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #a00;
-}
-
-.add-folder {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  z-index: 999;
-}
-
-input {
-  flex-grow: 1;
-  padding: 0.25rem 0.5rem;
-}
-</style>

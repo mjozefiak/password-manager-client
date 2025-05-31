@@ -7,7 +7,7 @@ import ToastService from 'primevue/toastservice';
 import InputText from 'primevue/inputtext';
 import { Form } from '@primevue/forms';
 import router from './router/index.js';
-
+import Toast from 'primevue/toast';
 
 const app = createApp(App);
 
@@ -16,7 +16,7 @@ app.use(PrimeVue, {
       preset: Aura,
       options: {
          prefix: 'p',
-         darkModeSelector: 'system',
+         darkModeSelector: false,
          cssLayer: false,
       },
    },
@@ -26,5 +26,6 @@ app.use(ToastService);
 app.component('Button', Button);
 app.component('InputText', InputText);
 app.component('Form', Form);
+app.component('Toast', Toast);
 
 app.mount('#app');
