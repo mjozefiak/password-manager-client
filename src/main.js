@@ -1,5 +1,5 @@
 import { createApp } from 'vue';
-import { createRouter, createMemoryHistory } from 'vue-router';
+import { createRouter, createWebHistory } from 'vue-router';
 import Button from 'primevue/button';
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
@@ -8,11 +8,20 @@ import ToastService from 'primevue/toastservice';
 import LoginView from './view/LoginView.vue';
 import InputText from 'primevue/inputtext';
 import { Form } from '@primevue/forms';
+import RegisterView from './view/RegisterView.vue';
+import DashboardView from './view/DashboardView.vue';
 
-const routes = [{ path: '/login', component: LoginView }];
+
+const routes = [
+  { path: '/', redirect: '/login' },
+  { path: '/login', component: LoginView },
+  { path: '/register', component: RegisterView },
+  { path: '/dashboard', component: DashboardView },
+];
+
 
 const router = createRouter({
-   history: createMemoryHistory(),
+   history: createWebHistory(),
    routes,
 });
 
