@@ -6,9 +6,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+ 
 });
 
 api.interceptors.request.use((config) => {
@@ -30,12 +28,12 @@ api.interceptors.response.use(
 );
 
 export async function fetchFolders() {
-  const res = await api.get('api/folders');
+  const res = await api.get('/api/folders');
   return res.data.member;
 }
 
 export async function createFolder(data) {
-  const res = await api.post('api/folders', data);
+  const res = await api.post('/api/folders', data);
   return res.data;
 }
 

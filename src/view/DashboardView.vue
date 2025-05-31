@@ -1,44 +1,59 @@
 <template>
-    <div class="dashboard-container">
-      <Folders :selectedFolderId="selectedFolderId" @folderSelected="onFolderSelected" />
-      <Valuts :folderId="selectedFolderId" />
-    </div>
-  </template>
-  
-  <script setup>
-  import { ref } from 'vue';
-  import Folders from '../components/Folders.vue';
-  import Valuts from '../components/Valuts.vue';
-  
-  const selectedFolderId = ref(null);
-  
-  function onFolderSelected(id) {
-    selectedFolderId.value = id;
-  }
-  </script>
-  
-  <style scoped>
-  .dashboard-container {
-    display: flex;
-    height: 100%;
-    gap: 1rem;
-  }
-  
-  .dashboard-container > * {
-    background: white;
-    border-radius: 6px;
-    box-shadow: 0 0 10px rgb(0 0 0 / 0.1);
-    overflow-y: auto;
-  }
+  <div class="dashboard-container">
+    <Folders 
+      :folders="folders" 
+      :selectedFolderId="selectedFolderId" 
+      @folder-selected="onFolderSelected" 
+      @folder-changed="loadFolders" 
+    />
+    <!-- <Valuts :folderId="selectedFolderId" /> -->
+  </div>
+</template>
 
-  .dashboard-container > :first-child {
-    width: 280px;
-    min-width: 280px;
-  }
+<script>
+import { ref, onMounted } from 'vue';
+import Folders from '@/components/Folders.vue';
+// import Valuts from '@/components/Valuts.vue';
+import { fetchFolders } from '../api';
 
-  .dashboard-container > :last-child {
-    flex: 1;
-    min-width: 0;
-  }
-  </style>
-  
+export default {
+  components: { Folders },
+  setup() {
+    const folders = ref([]);
+    const selectedFolderId = ref(null);
+
+    async function loadFolders() {
+      try {
+        folders.value = await fetchFolders();
+        if (folders.value.length > 0 && !selectedFolderId.value) {
+          selectedFolderId.value = folders.value[0].id;
+        }
+      } catch (error) {
+        console.error('Błąd podczas ładowania folderów:', error);
+      }
+    }
+
+    function onFolderSelected(folder) {
+      selectedFolderId.value = folder ? folder.id : null;
+    }
+
+    onMounted(() => {
+      loadFolders();
+    });
+
+    return {
+      folders,
+      selectedFolderId,
+      loadFolders,
+      onFolderSelected,
+    };
+  },
+};
+</script>
+
+<style scoped>
+.dashboard-container {
+  display: flex;
+  height: 100vh;
+}
+</style>
