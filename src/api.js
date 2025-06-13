@@ -2,7 +2,7 @@
 import axios from 'axios';
 import router from './router';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://keepassbackend.azurewebsites.net';
 
 const api = axios.create({
    baseURL: API_BASE_URL,
@@ -44,9 +44,7 @@ export async function createFolder(data) {
 }
 
 export async function updateFolder(id, data) {
-   const res = await api.patch(`/api/folders/${id}`, data, {
-      headers: { 'Content-Type': 'application/merge-patch+json' },
-   });
+   const res = await api.patch(`/api/folders/${id}`, data);
    return res.data;
 }
 
@@ -66,9 +64,7 @@ export async function createValut(data) {
 
 export const updateValut = async ({ id, data }) => {
    try {
-      const response = await api.patch(`api/valuts/${id}`, data, {
-         headers: { 'Content-Type': 'application/merge-patch+json' },
-      });
+      const response = await api.patch(`api/valuts/${id}`, data);
       return response.data;
    } catch (error) {}
 };
